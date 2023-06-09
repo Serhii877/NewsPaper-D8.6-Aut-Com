@@ -1,0 +1,93 @@
+from news.models import *
+
+# 1 Создать двух пользователей (с помощью метода User.objects.create_user('username')).
+
+user1 = User.objects.create_user(username = 'user1', first_name = "Лев Анатольевич Толстой")
+user2 = User.objects.create_user(username = 'user2', first_name = "Сергей Александрович Есенин")
+user3 = User.objects.create_user(username = 'user3', first_name = "Михаил Юрьевич Лермонтов")
+user4 = User.objects.create_user(username = 'user4', first_name = "Александр Сергеевич Пушкин")
+user5 = User.objects.create_user(username = 'user5', first_name = "Афанасий Афанасьевич Фет") 
+
+# 2 Создать два объекта модели Author, связанные с пользователями.
+
+author1 = Author.objects.create(user_author = user1)
+author2 = Author.objects.create(user_author = user2)
+
+# 3 Добавить 4 категории в модель Category.
+
+
+economy = Category.objects.create(category=Category.economy)
+politician = Category.objects.create(category=Category.politician) 
+worldnews = Category.objects.create(category=Category.worldnews) 
+hostnews = Category.objects.create(category=Category.hostnews) 
+sport = Category.objects.create(category=Category.sport)  
+
+# 4 Добавить 2 статьи и 1 новость.
+
+news1 = Post.objects.create(author = author1, choice_title=Post.news, post_text = "Здесь написан текст первой новости", title = "Заголовок первой новости")
+article1 = Post.objects.create(author = author2, choice_title=Post.article, post_text = "Здесь написан текст первой статьи", title = "Заголовок первой статьи")
+article2 = Post.objects.create(author = author2, choice_title=Post.article, post_text = "Здесь написан текст второй статьи", title = "Заголовок второй статьи")
+news2 = Post.objects.create(author = author1, choice_title=Post.news, post_text = "Конечное местоположение модели определяется во время выполнения, поэтому вы не можете просто импортировать ее. В своих собственных проектах, где вы контролируете установку AUTH_USER_MODEL, вы можете обойтись прямым импортом модели. Однако если вы хотите написать код, который может быть использован в других проектах Django, это небезопасно.", title = "Заголовок второй новости")
+
+
+# 5 Присвоить им категории (как минимум в одной статье/новости должно быть не меньше 2 категорий).
+
+news1.posts.add(economy, politician)
+article1.posts.add(worldnews)
+article2.posts.add(worldnews, sport)
+
+# 6 Создать как минимум 4 комментария к разным объектам модели Post (в каждом объекте должен быть как минимум один комментарий).
+
+comment1 = Comment.objects.create(post_comment = news1, user_comment = user1, comment_text = "Коментарий первого юзера к первой новости")
+comment2 = Comment.objects.create(post_comment = article1, user_comment = user2, comment_text = "Коментарий второго юзера к первой статье")
+comment3 = Comment.objects.create(post_comment = article1, user_comment = user3, comment_text = "Коментарий третьего юзера к первой статье")
+comment4 = Comment.objects.create(post_comment = article2, user_comment = user3, comment_text = "Коментарий третьего юзера ко второй статье")
+comment5 = Comment.objects.create(post_comment = news2, user_comment = user4, comment_text = "Коментарий четвертого юзера ко второй статье")
+comment6 = Comment.objects.create(post_comment = news2, user_comment = user5, comment_text = "Коментарий пятого юзера ко второй статье")
+comment7 = Comment.objects.create(post_comment = news2, user_comment = user3, comment_text = "снова Коментарий третьего юзера ко второй статье")
+
+# 7 Применяя функции like() и dislike() к статьям/новостям и комментариям, скорректировать рейтинги этих объектов.
+
+comment1.like()
+comment2.like()
+comment2.like()
+comment3.dislike()
+comment3.dislike()
+comment3.dislike()
+comment3.like()
+comment4.like()
+comment5.like()
+comment6.dislike()
+comment7.like()
+comment7.like()
+comment7.like()
+
+news1.like()
+news2.like()
+news2.like()
+news2.like()
+news2.like()
+news2.like()
+article1.like()
+article1.like()
+article2.dislike()
+
+#8 Обновить рейтинги пользователей.
+
+author2.update_rating()
+author1.update_rating()
+
+#9 Вывести username и рейтинг лучшего пользователя (применяя сортировку и возвращая поля первого объекта).
+
+Author.objects.all().order_by('-user_rating').values('user_author__username', 'user_rating').first()
+
+#10 Вывести дату добавления, username автора, рейтинг, заголовок и превью лучшей статьи, основываясь на лайках/дислайках к этой статье.
+Post.objects.values("time_in_comment", "author__user_author__username", "rating_post", "title").order_by('-rating_post').first()
+Post.objects.order_by('-rating_post').first().preview() 
+
+#11 Вывести все комментарии (дата, пользователь, рейтинг, текст) к этой статье.
+best_post = Post.objects.order_by('-rating_post').first()
+best_post.comment_set.all().values('time_in_comment', 'user_comment__username', 'rating_comment', 'comment_text')
+
+ 
+
